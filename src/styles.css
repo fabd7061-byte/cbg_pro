@@ -11,4 +11,7 @@ body { margin: 0; min-width: 320px; }
 .font-display { font-family: 'Manrope', sans-serif; }
 .eyebrow { color: #1d8c55; font-size: 10px; font-weight: 700; letter-spacing: .23em; text-transform: uppercase; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes partnerScroll { from { transform: translateX(-25%); } to { transform: translateX(0); } }
+.partner-marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent); }
+.partner-track { display: flex; width: max-content; animation: partnerScroll 28s linear infinite; }
 ::selection { background: #b8dc84; color: #0d4a37; }

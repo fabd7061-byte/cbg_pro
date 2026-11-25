@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
   Check,
@@ -9,8 +9,11 @@ import {
   Leaf,
   Menu,
   MoveUpRight,
+  RotateCcw,
   Sprout,
   Users,
+  Volume2,
+  VolumeX,
   X,
   Zap,
 } from 'lucide-react'
@@ -46,11 +49,21 @@ const storySlides = [
   { image: '/gallery/protected-growing.jpg', eyebrow: 'Climate-ready agriculture', title: 'More resilience in every harvest.', copy: 'Practical growing systems help communities produce consistently while using resources thoughtfully.' },
 ]
 
+const partnerLogos = [
+  { image: '/partners/ict-chamber.png', name: 'ICT Chamber' },
+  { image: '/partners/ilo.png', name: 'International Labour Organization' },
+  { image: '/partners/luxaid.png', name: 'Luxembourg Aid & Development' },
+  { image: '/partners/crat.png', name: 'CRAT' },
+]
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [showAll, setShowAll] = useState(false)
   const [selectedImage, setSelectedImage] = useState<{ src: string; title: string } | null>(null)
   const [activeSlide, setActiveSlide] = useState(0)
+  const [videoMuted, setVideoMuted] = useState(true)
+  const [videoVolume, setVideoVolume] = useState(0.8)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     const timer = window.setInterval(() => setActiveSlide((current) => (current + 1) % storySlides.length), 5500)
@@ -60,6 +73,27 @@ function App() {
   const goToSlide = (index: number) => setActiveSlide((index + storySlides.length) % storySlides.length)
 
   const closeMenu = () => setMenuOpen(false)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) video.play().catch(() => undefined)
+      else video.pause()
+    }, { threshold: 0.45 })
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.volume = videoVolume
+  }, [videoVolume])
+
+  const restartVideo = () => {
+    if (!videoRef.current) return
+    videoRef.current.currentTime = 0
+    videoRef.current.play().catch(() => undefined)
+  }
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#f8f8f2] text-[#123b2d]">
@@ -74,7 +108,7 @@ function App() {
             <a className="transition hover:text-[#1d8c55]" href="#gallery">Gallery</a>
             <a className="transition hover:text-[#1d8c55]" href="#contact">Contact</a>
           </nav>
-          <a href="#contact" className="hidden items-center gap-2 rounded-full bg-[#0d4a37] px-5 py-3 text-xs font-bold text-white shadow-lg shadow-[#0d4a37]/15 transition hover:-translate-y-0.5 hover:bg-[#176a49] sm:flex">
+          <a href="mailto:jsongclaude21@gmail.com" className="hidden items-center gap-2 rounded-full bg-[#0d4a37] px-5 py-3 text-xs font-bold text-white shadow-lg shadow-[#0d4a37]/15 transition hover:-translate-y-0.5 hover:bg-[#176a49] sm:flex">
             Become a partner <MoveUpRight size={14} />
           </a>
           <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu" className="rounded-full bg-white p-3 text-[#0d4a37] shadow-sm lg:hidden">
@@ -84,7 +118,7 @@ function App() {
 
         {menuOpen && <nav className="relative z-30 mb-4 flex flex-col gap-4 rounded-2xl bg-white p-6 text-sm font-semibold shadow-xl lg:hidden">
           {['about', 'work', 'impact', 'gallery', 'contact'].map((item) => <a key={item} href={`#${item}`} onClick={closeMenu} className="capitalize">{item === 'about' ? 'About us' : item === 'work' ? 'Our work' : item === 'impact' ? 'Our impact' : item === 'gallery' ? 'Gallery' : 'Contact'}</a>)}
-          <a href="#contact" onClick={closeMenu} className="mt-2 rounded-full bg-[#0d4a37] px-5 py-3 text-center text-white">Become a partner</a>
+          <a href="mailto:jsongclaude21@gmail.com" onClick={closeMenu} className="mt-2 rounded-full bg-[#0d4a37] px-5 py-3 text-center text-white">Become a partner</a>
         </nav>}
 
         <main id="top">
@@ -95,19 +129,19 @@ function App() {
               <p className="mt-8 max-w-lg text-base leading-7 text-[#527164] sm:text-lg">We connect modern agriculture, digital technology, practical skills, and entrepreneurship to create sustainable solutions for farmers and young people.</p>
               <div className="mt-9 flex flex-wrap items-center gap-4">
                 <a href="#work" className="group flex items-center gap-3 rounded-full bg-[#e1a83a] px-6 py-4 text-sm font-bold text-[#183f2f] shadow-lg shadow-[#e1a83a]/20 transition hover:-translate-y-0.5">Explore our work <span className="grid h-7 w-7 place-items-center rounded-full bg-[#0d4a37] text-white transition group-hover:translate-x-1"><ArrowRight size={14} /></span></a>
-                <a href="#contact" className="flex items-center gap-2 px-3 py-3 text-sm font-bold text-[#0d4a37] transition hover:text-[#2a9c60]">Let&apos;s connect <ArrowRight size={16} /></a>
+                <a href="mailto:jsongclaude21@gmail.com" className="flex items-center gap-2 px-3 py-3 text-sm font-bold text-[#0d4a37] transition hover:text-[#2a9c60]">Let&apos;s connect <ArrowRight size={16} /></a>
               </div>
             </div>
             <div className="relative mx-auto w-full max-w-[560px] lg:ml-auto">
               <div className="absolute -right-8 -top-8 h-48 w-48 rounded-full bg-[#cfe8d2] blur-3xl" />
-              <div className="relative aspect-[.93] overflow-hidden rounded-[2.5rem] bg-[#d9ead8] shadow-2xl shadow-[#295a42]/10">
-                <div className="absolute inset-0 bg-[linear-gradient(145deg,transparent_15%,rgba(13,74,55,.2)),radial-gradient(circle_at_75%_10%,#e6f3d8,transparent_38%)]" />
-                <div className="absolute -bottom-14 -left-10 h-72 w-72 rounded-full border-[22px] border-white/50" />
-                <div className="absolute -right-20 top-12 h-80 w-80 rounded-full border-[28px] border-[#2a9c60]/25" />
-                <div className="absolute bottom-0 left-0 right-0 h-[48%] bg-[linear-gradient(165deg,transparent_0%,rgba(20,85,48,.5)_80%),linear-gradient(12deg,#255c3a,#6a963c)]" />
-                <div className="absolute bottom-0 left-0 right-0 h-24 bg-[#194b32] [clip-path:polygon(0_38%,10%_25%,20%_42%,32%_12%,47%_34%,61%_10%,75%_38%,88%_14%,100%_34%,100%_100%,0_100%)]" />
-                <div className="absolute left-8 top-8 rounded-full bg-white/80 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#0d4a37] backdrop-blur">Innovation in action</div>
-                <div className="absolute bottom-9 left-8 right-8 flex items-end justify-between text-white"><div><p className="font-display text-3xl">Better farms.</p><p className="text-sm text-white/70">Stronger communities.</p></div><Sprout size={40} strokeWidth={1.2} /></div>
+              <div className="relative aspect-[.93] overflow-hidden rounded-[2.5rem] bg-[#0d4a37] shadow-2xl shadow-[#295a42]/10">
+                <video ref={videoRef} src="/video/cbg-innovation.mp4" muted={videoMuted} loop playsInline preload="metadata" className="h-full w-full object-cover" aria-label="CBG Agri Innovation Hub innovation video" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#08291f]/75 via-transparent to-[#08291f]/10" />
+                <div className="absolute left-6 top-6 rounded-full bg-white/85 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#0d4a37] backdrop-blur">Innovation in action</div>
+                <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between gap-3 text-white">
+                  <div><p className="font-display text-2xl sm:text-3xl">Better farms.</p><p className="text-sm text-white/70">Stronger communities.</p></div>
+                  <div className="flex items-center gap-2"><button type="button" onClick={() => setVideoMuted(!videoMuted)} aria-label={videoMuted ? 'Turn video sound on' : 'Mute video'} className="grid h-10 w-10 place-items-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25">{videoMuted ? <VolumeX size={17} /> : <Volume2 size={17} />}</button><input type="range" min="0" max="1" step="0.05" value={videoVolume} onChange={(event) => { setVideoVolume(Number(event.target.value)); setVideoMuted(false) }} aria-label="Video volume" className="hidden w-20 accent-[#e8c05b] sm:block" /><button type="button" onClick={restartVideo} aria-label="Restart video" className="grid h-10 w-10 place-items-center rounded-full bg-[#e8c05b] text-[#183f2f] transition hover:bg-[#f0cf7d]"><RotateCcw size={17} /></button></div>
+                </div>
               </div>
               <div className="absolute -bottom-7 -left-4 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-xl sm:-left-8"><span className="grid h-10 w-10 place-items-center rounded-full bg-[#e4f3dc] text-[#238b52]"><Users size={19} /></span><div><p className="text-lg font-bold text-[#0d4a37]">Community first</p><p className="text-[11px] text-[#759085]">Solutions that scale</p></div></div>
             </div>
@@ -140,12 +174,14 @@ function App() {
 
           <section id="impact" className="relative overflow-hidden rounded-[2.5rem] bg-[#0d4a37] px-7 py-14 text-white sm:px-12 lg:px-20 lg:py-16"><div className="absolute -right-20 -top-28 h-80 w-80 rounded-full border-[35px] border-[#65b45e]/15" /><div className="relative grid gap-12 lg:grid-cols-[1.1fr_.9fr] lg:items-end"><div><p className="eyebrow text-[#b8dc84]">Our impact</p><h2 className="mt-4 max-w-xl font-display text-4xl leading-tight tracking-[-.035em] sm:text-5xl">When knowledge grows, <span className="text-[#b8dc84]">everything</span> grows.</h2><p className="mt-6 max-w-md leading-7 text-white/65">From a young person learning to build a smart irrigation system to a farmer harvesting fresh produce all year, we’re building confidence through action.</p></div><div className="grid grid-cols-3 gap-3 border-t border-white/15 pt-6 lg:border-l lg:border-t-0 lg:pl-10">{stats.map(([value, label]) => <div key={label}><p className="font-display text-3xl text-[#e8c05b] sm:text-4xl">{value}</p><p className="mt-2 max-w-[90px] text-xs leading-5 text-white/55">{label}</p></div>)}</div></div></section>
 
+          <section className="overflow-hidden border-y border-[#dbe7dc] py-12"><div className="text-center"><p className="eyebrow">Partners in progress</p><h2 className="mt-3 font-display text-2xl font-semibold tracking-[-.03em] text-[#0d4a37]">Growing stronger, together.</h2></div><div className="partner-marquee mt-8"><div className="partner-track">{[...partnerLogos, ...partnerLogos].map((partner, index) => <div key={`${partner.name}-${index}`} className="flex min-w-[210px] items-center justify-center px-8"><img src={partner.image} alt={partner.name} className="max-h-14 w-auto max-w-[170px] object-contain grayscale opacity-60 transition hover:grayscale-0 hover:opacity-100" /></div>)}</div></div></section>
+
           <section id="gallery" className="py-20 lg:py-28"><div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="eyebrow">From the field</p><h2 className="mt-4 font-display text-4xl tracking-[-.035em] text-[#0d4a37] sm:text-5xl">Your work, in focus.</h2></div><p className="max-w-xs text-sm leading-6 text-[#718a7d]">Real moments from CBG&apos;s experiments, demonstrations, and community learning.</p></div><div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{galleryItems.map((item, index) => <button type="button" key={item.image} onClick={() => setSelectedImage({ src: item.image, title: item.label })} className="group relative aspect-[1.18] cursor-pointer overflow-hidden rounded-[1.5rem] border border-dashed border-[#b8d3ba] bg-[#eaf3e7] text-left transition hover:-translate-y-1 hover:border-[#2a9c60] hover:shadow-xl"><img src={item.image} alt={item.label} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /><div className="absolute inset-x-3 bottom-3 flex items-center justify-between rounded-xl bg-[#0d4a37]/85 px-3 py-2 text-xs font-semibold text-white backdrop-blur"><span>{item.label}</span><span className="opacity-0 transition group-hover:opacity-100">View image</span></div></button>)}</div></section>
           {selectedImage && <div role="dialog" aria-modal="true" aria-label={selectedImage.title} className="fixed inset-0 z-50 grid place-items-center bg-[#08291f]/90 p-5 backdrop-blur-sm" onClick={() => setSelectedImage(null)}><div className="relative max-h-[90vh] max-w-5xl" onClick={(event) => event.stopPropagation()}><img src={selectedImage.src} alt={selectedImage.title} className="max-h-[82vh] max-w-full rounded-2xl object-contain shadow-2xl" /><div className="mt-4 flex items-center justify-between gap-5 text-white"><p className="font-display text-lg">{selectedImage.title}</p><button type="button" onClick={() => setSelectedImage(null)} className="rounded-full bg-white/15 px-4 py-2 text-sm font-semibold transition hover:bg-white/25">Close</button></div></div></div>}
 
-          <section id="contact" className="grid gap-8 py-20 lg:grid-cols-[1fr_auto] lg:items-center lg:py-28"><div><p className="eyebrow">Ready to grow?</p><h2 className="mt-4 max-w-2xl font-display text-4xl leading-tight tracking-[-.04em] text-[#0d4a37] sm:text-6xl">Let&apos;s build the future of agriculture <span className="font-serif italic text-[#2a9c60]">together.</span></h2></div><div className="flex flex-col items-start gap-3 lg:items-end"><a href="mailto:hello@cbgagri.org" className="rounded-full bg-[#e1a83a] px-7 py-4 text-sm font-bold text-[#183f2f] transition hover:bg-[#f0c565]">Start a conversation <ArrowRight className="ml-2 inline" size={16} /></a><p className="text-xs text-[#779185]">hello@cbgagri.org · Rubavu, Rwanda</p></div></section>
+          <section id="contact" className="grid gap-8 py-20 lg:grid-cols-[1fr_auto] lg:items-center lg:py-28"><div><p className="eyebrow">Ready to grow?</p><h2 className="mt-4 max-w-2xl font-display text-4xl leading-tight tracking-[-.04em] text-[#0d4a37] sm:text-6xl">Let&apos;s build the future of agriculture <span className="font-serif italic text-[#2a9c60]">together.</span></h2></div><div className="flex flex-col items-start gap-3 lg:items-end"><a href="mailto:jsongclaude21@gmail.com" className="rounded-full bg-[#e1a83a] px-7 py-4 text-sm font-bold text-[#183f2f] transition hover:bg-[#f0c565]">Start a conversation <ArrowRight className="ml-2 inline" size={16} /></a><p className="text-xs text-[#779185]">jsongclaude21@gmail.com · Rubavu, Rwanda</p></div></section>
         </main>
-        <footer className="flex flex-col gap-4 border-t border-[#dbe7dc] py-7 text-xs text-[#789185] sm:flex-row sm:items-center sm:justify-between"><p>© 2025 CBG Agri Innovation Hub</p><p className="flex items-center gap-2"><Check size={14} className="text-[#2a9c60]" /> Growing with purpose</p></footer>
+        <footer className="flex flex-col gap-4 border-t border-[#dbe7dc] py-7 text-xs text-[#789185] sm:flex-row sm:items-center sm:justify-between"><p>© 2026 CBG Agri Innovation Hub</p><p className="flex items-center gap-2"><Check size={14} className="text-[#2a9c60]" /> Growing with purpose</p></footer>
       </div>
     </div>
   )
